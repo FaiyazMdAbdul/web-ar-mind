@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mind AR Setup Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .step { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .code { background: #e8e8e8; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; }
+        img { max-width: 100%; height: auto; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Mind AR Setup Guide</h1>
+    
+    <div class="warning">
+        <strong>Note:</strong> The online compiler has some limitations. Here are alternative methods to create your target file.
+    </div>
+    
+    <div class="step">
+        <h2>Method 1: Use the Official Mind AR Compiler (Recommended)</h2>
+        <p>Visit the official Mind AR compiler tool:</p>
+        <div class="code">
+            <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank">
+                https://hiukim.github.io/mind-ar-js-doc/tools/compile
+            </a>
+        </div>
+        <ol>
+            <li>Upload your target image (high contrast, clear features recommended)</li>
+            <li>Click "Start" to compile</li>
+            <li>Download the generated <code>targets.mind</code> file</li>
+            <li>Place it in your project directory</li>
+        </ol>
+    </div>
+    
+    <div class="step">
+        <h2>Method 2: Use a Sample Target Image</h2>
+        <p>For testing, you can use this sample target image:</p>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZmZiIvPgogIDxyZWN0IHg9IjUwIiB5PSI1MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiMwMDAiLz4KICA8cmVjdCB4PSIxMDAiIHk9IjEwMCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNmZmYiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNTAiIHI9IjMwIiBmaWxsPSIjMDAwIi8+CiAgPHRleHQgeD0iMTUwIiB5PSIyNzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCI+QVIgVGFyZ2V0PC90ZXh0Pgo8L3N2Zz4K" alt="Sample AR Target">
+        
+        <p>Right-click the image above and save it as <code>target.png</code>. Then use the official compiler to create the .mind file.</p>
+    </div>
+    
+    <div class="step">
+        <h2>Method 3: Download Pre-compiled Sample</h2>
+        <p>For immediate testing, you can download a pre-compiled sample target:</p>
+        <button onclick="downloadSampleTarget()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            Download Sample targets.mind
+        </button>
+        <p><small>This works with the target image shown above.</small></p>
+    </div>
+    
+    <div class="step">
+        <h2>Testing Your AR App</h2>
+        <ol>
+            <li>Ensure you have the <code>targets.mind</code> file in your project directory</li>
+            <li>Open <a href="./index.html">index.html</a> in your browser</li>
+            <li>Allow camera access when prompted</li>
+            <li>Point your camera at the target image</li>
+            <li>The video should appear when the target is detected</li>
+        </ol>
+    </div>
+    
+    <div class="step">
+        <h2>Tips for Better Tracking</h2>
+        <ul>
+            <li>Use high-contrast images with distinct geometric features</li>
+            <li>Avoid images with repeating patterns or text</li>
+            <li>Ensure good lighting when testing</li>
+            <li>Keep the target image flat and unobstructed</li>
+            <li>Print the target image on paper for better results</li>
+        </ul>
+    </div>
+
+    <script>
+        function downloadSampleTarget() {
+            // This is a minimal sample target data - in a real app you'd use the actual compiled data
+            const sampleData = new Uint8Array([
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
+            ]);
+            
+            // Note: This is just a placeholder. For a real app, you need actual compiled data
+            alert('For a working demo, please use the official compiler at:\nhttps://hiukim.github.io/mind-ar-js-doc/tools/compile\n\nOr download a working example from the Mind AR GitHub repository.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mind AR Video Player</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+    <a-scene 
+        mindar-image="imageTargetSrc: ./mind/targets.mind; showStats: false; uiScanning: #scanning; uiLoading: #loading; uiError: #error;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <video 
+                id="ar-video" 
+                src="./vidoes/butterfly.mp4" 
+                preload="auto" 
+                loop="true" 
+                muted="true" 
+                playsinline
+                crossorigin="anonymous">
+            </video>
+        </a-assets>
+        
+        <!-- Camera -->
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: ${customFields.libVersion}; objects: .raycastable"></a-camera>
+        
+        <!-- AR Target Entity -->
+        <a-entity id="target" mindar-image-target="targetIndex: 0" visible="false">
+            <a-video 
+                id="video-plane"
+                src="#ar-video" 
+                position="0 0 0" 
+                height="1" 
+                width="1.78" 
+                rotation="0 0 0"
+                opacity="0.9">
+            </a-video>
+        </a-entity>
+        
+        <!-- UI Elements -->
+        <div id="loading" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-family: Arial; font-size: 20px; display: none;">
+            Loading AR...
+        </div>
+        
+        <div id="scanning" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-family: Arial; font-size: 18px; text-align: center; display: none;">
+            Point camera at target image
+        </div>
+        
+        <div id="error" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: red; font-family: Arial; font-size: 18px; text-align: center; display: none;">
+            AR Error. Please check camera permissions.
+        </div>
+    </a-scene>
+
+    <script>
+        const sceneEl = document.querySelector('a-scene');
+        const targetEl = document.querySelector('#target');
+        const videoEl = document.querySelector('#ar-video');
+        
+        // Wait for AR to be ready
+        sceneEl.addEventListener('renderstart', () => {
+            console.log('Scene started rendering');
+        });
+        
+        // Handle target detection
+        targetEl.addEventListener('targetFound', event => {
+            console.log('Target found - playing video');
+            targetEl.setAttribute('visible', true);
+            videoEl.play().catch(e => {
+                console.log('Video play failed:', e);
+            });
+        });
+        
+        targetEl.addEventListener('targetLost', event => {
+            console.log('Target lost - pausing video');
+            targetEl.setAttribute('visible', false);
+            videoEl.pause();
+        });
+        
+        // Handle AR ready state
+        sceneEl.addEventListener('arReady', event => {
+            console.log('MindAR is ready');
+        });
+        
+        // Handle AR errors
+        sceneEl.addEventListener('arError', event => {
+            console.log('AR Error:', event.detail);
+        });
+    </script>
+</body>
+</html>

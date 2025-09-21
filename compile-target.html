@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mind AR Target Compiler</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import {loadMindARImageModule} from 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js';
+        
+        window.mindARReady = false;
+        
+        loadMindARImageModule().then(({Compiler}) => {
+            window.MindARCompiler = Compiler;
+            window.mindARReady = true;
+            console.log('Mind AR Compiler loaded successfully');
+            
+            // Update UI to show ready state
+            const statusDiv = document.getElementById('library-status');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<span style="color: green;">✓ Mind AR library loaded successfully</span>';
+            }
+        }).catch(error => {
+            console.error('Failed to load Mind AR:', error);
+            const statusDiv = document.getElementById('library-status');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<span style="color: red;">✗ Failed to load Mind AR library</span>';
+            }
+        });
+    </script>
+</head>
+<body>
+    <div style="font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto;">
+        <h1>Mind AR Target Compiler</h1>
+        <p>Use this tool to compile your target image into a .mind file for AR tracking.</p>
+        
+        <div id="library-status" style="margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+            Loading Mind AR library...
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <label for="imageInput" style="display: block; margin-bottom: 10px; font-weight: bold;">
+                Select Target Image:
+            </label>
+            <input type="file" id="imageInput" accept="image/*" style="margin-bottom: 10px;">
+            <div style="font-size: 12px; color: #666;">
+                Recommended: High contrast image with distinct features, 500x500px or larger
+            </div>
+        </div>
+        
+        <button id="compileBtn" onclick="compileTarget()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            Compile Target
+        </button>
+        
+        <div id="status" style="margin-top: 20px; padding: 10px; display: none;"></div>
+        
+        <div id="preview" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        async function compileTarget() {
+            const fileInput = document.getElementById('imageInput');
+            const statusDiv = document.getElementById('status');
+            const compileBtn = document.getElementById('compileBtn');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showStatus('Please select an image file first.', 'error');
+                return;
+            }
+            
+            if (!window.mindARReady || !window.MindARCompiler) {
+                showStatus('Mind AR library is not ready yet. Please wait and try again.', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            compileBtn.disabled = true;
+            compileBtn.textContent = 'Compiling...';
+            
+            try {
+                showStatus('Reading image...', 'info');
+                
+                const image = new Image();
+                image.onload = async () => {
+                    try {
+                        showStatus('Compiling target features...', 'info');
+                        
+                        const compiler = new window.MindARCompiler();
+                        const dataList = await compiler.compileImageTargets([image]);
+                        
+                        showStatus('Target compiled successfully!', 'success');
+                        
+                        // Download the compiled target file
+                        const blob = new Blob([dataList], {type: 'application/octet-stream'});
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'targets.mind';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        showStatus('Target file downloaded as "targets.mind". Place this file in your project directory.', 'success');
+                        
+                    } catch (error) {
+                        console.error('Compilation error:', error);
+                        showStatus('Error compiling target: ' + error.message, 'error');
+                    }
+                    
+                    compileBtn.disabled = false;
+                    compileBtn.textContent = 'Compile Target';
+                };
+                
+                image.onerror = () => {
+                    showStatus('Error loading image. Please try a different file.', 'error');
+                    compileBtn.disabled = false;
+                    compileBtn.textContent = 'Compile Target';
+                };
+                
+                image.src = URL.createObjectURL(file);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Error: ' + error.message, 'error');
+                compileBtn.disabled = false;
+                compileBtn.textContent = 'Compile Target';
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = message;
+            
+            switch(type) {
+                case 'error':
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.style.border = '1px solid #f5c6cb';
+                    break;
+                case 'success':
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.style.border = '1px solid #c3e6cb';
+                    break;
+                case 'info':
+                    statusDiv.style.background = '#d1ecf1';
+                    statusDiv.style.color = '#0c5460';
+                    statusDiv.style.border = '1px solid #bee5eb';
+                    break;
+            }
+        }
+        
+        // Preview selected image
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewDiv = document.getElementById('preview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewDiv.innerHTML = `
+                        <h3>Selected Image Preview:</h3>
+                        <img src="${e.target.result}" style="max-width: 300px; max-height: 300px; border: 1px solid #ccc;">
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewDiv.innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>
